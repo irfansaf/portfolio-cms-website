@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import TiptapEditor from '../components/TiptapEditor';
 import { Project, DiaryEntry } from '../types';
+import { 
+  createProject, updateProject, deleteProject, 
+  createDiary, updateDiary, deleteDiary 
+} from '@/api/content';
 import { LogOut, Plus, Pencil, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -18,19 +22,17 @@ interface CMSDashboardProps {
   theme: 'light' | 'dark';
   onThemeToggle: () => void;
   isAuthenticated: boolean;
-  onLogin: () => void;
   onLogout: () => void;
   projects: Project[];
   diaryEntries: DiaryEntry[];
-  onUpdateProjects: (projects: Project[]) => void;
-  onUpdateDiaries: (diaries: DiaryEntry[]) => void;
+  onUpdateProjects: () => void;
+  onUpdateDiaries: () => void;
 }
 
 export default function CMSDashboard({
   theme,
   onThemeToggle,
   isAuthenticated,
-  onLogin,
   onLogout,
   projects,
   diaryEntries,
@@ -39,8 +41,6 @@ export default function CMSDashboard({
 }: CMSDashboardProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   
   // Project form state
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
@@ -48,7 +48,7 @@ export default function CMSDashboard({
   const [projectForm, setProjectForm] = useState({
     title: '',
     description: '',
-    imgSrc: '',
+    img_src: '',
     role: '',
     technologies: '',
     overview: '',
@@ -69,22 +69,7 @@ export default function CMSDashboard({
     window.scrollTo(0, 0);
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (username === 'admin' && password === 'admin') {
-      onLogin();
-      toast({
-        title: "Login successful",
-        description: "Welcome to the CMS dashboard!",
-      });
-    } else {
-      toast({
-        title: "Login failed",
-        description: "Invalid username or password. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
+
 
   // Project handlers
   const handleAddProject = () => {
@@ -92,7 +77,7 @@ export default function CMSDashboard({
     setProjectForm({
       title: '',
       description: '',
-      imgSrc: '',
+      img_src: '',
       role: '',
       technologies: '',
       overview: '',
@@ -102,11 +87,12 @@ export default function CMSDashboard({
   };
 
   const handleEditProject = (project: Project) => {
+    console.log('Editing project:', project);
     setEditingProject(project);
     setProjectForm({
       title: project.title,
       description: project.description,
-      imgSrc: project.imgSrc,
+      img_src: project.img_src,
       role: project.role,
       technologies: project.technologies.join(', '),
       overview: project.overview,
@@ -115,46 +101,62 @@ export default function CMSDashboard({
     setProjectDialogOpen(true);
   };
 
-  const handleSaveProject = () => {
+  const handleSaveProject = async () => {
+    console.log('Saving project, editingProject:', editingProject);
     const slug = projectForm.title.toLowerCase().replace(/\s+/g, '-');
     const newProject: Project = {
       id: editingProject?.id || Date.now().toString(),
       slug: editingProject?.slug || slug,
       title: projectForm.title,
       description: projectForm.description,
-      imgSrc: projectForm.imgSrc || 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&h=600&fit=crop',
+      img_src: projectForm.img_src || 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&h=600&fit=crop',
       role: projectForm.role,
       technologies: projectForm.technologies.split(',').map(t => t.trim()),
       overview: projectForm.overview,
       outcomes: projectForm.outcomes,
-      gallery: [projectForm.imgSrc || 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&h=600&fit=crop'],
+      gallery: [projectForm.img_src || 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&h=600&fit=crop'],
       links: [],
     };
 
-    if (editingProject) {
-      onUpdateProjects(projects.map(p => p.id === editingProject.id ? newProject : p));
-      toast({
-        title: "Project updated",
-        description: "Your project has been updated successfully.",
-      });
-    } else {
-      onUpdateProjects([...projects, newProject]);
-      toast({
-        title: "Project created",
-        description: "Your new project has been created successfully.",
-      });
+    try {
+      if (editingProject) {
+        await updateProject(editingProject.id, newProject);
+        toast({
+          title: "Project updated",
+          description: "Your project has been updated successfully.",
+        });
+      } else {
+        await createProject({ ...newProject, id: undefined }); // Backend assigns ID
+        toast({
+          title: "Project created",
+          description: "Your new project has been created successfully.",
+        });
+      }
+      onUpdateProjects();
+    } catch (error) {
+       console.error(error);
+       toast({
+        title: "Error",
+        description: "Failed to save project",
+        variant: "destructive"
+       });
     }
 
     setProjectDialogOpen(false);
   };
 
-  const handleDeleteProject = (id: string) => {
+  const handleDeleteProject = async (id: string | number) => {
     if (confirm('Are you sure you want to delete this project?')) {
-      onUpdateProjects(projects.filter(p => p.id !== id));
-      toast({
-        title: "Project deleted",
-        description: "The project has been deleted successfully.",
-      });
+      try {
+        await deleteProject(id);
+        onUpdateProjects();
+        toast({
+          title: "Project deleted",
+          description: "The project has been deleted successfully.",
+        });
+      } catch (error) {
+        toast({ title: "Error", description: "Failed to delete project", variant: "destructive" });
+      }
     }
   };
 
@@ -181,7 +183,7 @@ export default function CMSDashboard({
     setDiaryDialogOpen(true);
   };
 
-  const handleSaveDiary = () => {
+  const handleSaveDiary = async () => {
     const slug = diaryForm.title.toLowerCase().replace(/\s+/g, '-');
     const newDiary: DiaryEntry = {
       id: editingDiary?.id || Date.now().toString(),
@@ -189,93 +191,49 @@ export default function CMSDashboard({
       title: diaryForm.title,
       excerpt: diaryForm.excerpt,
       content: diaryForm.content,
-      date: editingDiary?.date || new Date().toISOString().split('T')[0],
+      date: editingDiary?.date || new Date().toISOString(),
       visibility: diaryForm.visibility,
     };
 
-    if (editingDiary) {
-      onUpdateDiaries(diaryEntries.map(d => d.id === editingDiary.id ? newDiary : d));
-      toast({
-        title: "Diary entry updated",
-        description: "Your diary entry has been updated successfully.",
-      });
-    } else {
-      onUpdateDiaries([...diaryEntries, newDiary]);
-      toast({
-        title: "Diary entry created",
-        description: "Your new diary entry has been created successfully.",
-      });
+    try {
+      if (editingDiary) {
+        await updateDiary(editingDiary.id, newDiary);
+        toast({
+          title: "Diary entry updated",
+          description: "Your diary entry has been updated successfully.",
+        });
+      } else {
+        await createDiary({ ...newDiary, id: undefined });
+        toast({
+          title: "Diary entry created",
+          description: "Your new diary entry has been created successfully.",
+        });
+      }
+      onUpdateDiaries();
+    } catch (error) {
+       toast({ title: "Error", description: "Failed to save diary", variant: "destructive" });
     }
 
     setDiaryDialogOpen(false);
   };
 
-  const handleDeleteDiary = (id: string) => {
+  const handleDeleteDiary = async (id: string | number) => {
     if (confirm('Are you sure you want to delete this diary entry?')) {
-      onUpdateDiaries(diaryEntries.filter(d => d.id !== id));
-      toast({
-        title: "Diary entry deleted",
-        description: "The diary entry has been deleted successfully.",
-      });
+      try {
+        await deleteDiary(id);
+        onUpdateDiaries();
+        toast({
+          title: "Diary entry deleted",
+          description: "The diary entry has been deleted successfully.",
+        });
+      } catch (error) {
+        toast({ title: "Error", description: "Failed to delete diary", variant: "destructive" });
+      }
     }
   };
 
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-background text-foreground">
-        <NavBar currentPage="cms" theme={theme} onThemeToggle={onThemeToggle} />
-        
-        <main className="py-32 px-8">
-          <div className="max-w-md mx-auto">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-foreground">CMS Login</CardTitle>
-                <CardDescription className="text-muted-foreground">
-                  Enter your credentials to access the dashboard
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleLogin} className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="username" className="text-foreground">Username</Label>
-                    <Input
-                      id="username"
-                      type="text"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      className="bg-background text-foreground border-border"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-foreground">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="bg-background text-foreground border-border"
-                      required
-                    />
-                  </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    Login
-                  </Button>
-                  <p className="text-sm text-muted-foreground text-center">
-                    Demo credentials: admin / admin
-                  </p>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
-
-        <Footer />
-      </div>
-    );
+    return <Navigate to="/login" replace />;
   }
 
   return (
@@ -349,8 +307,8 @@ export default function CMSDashboard({
                           <Label htmlFor="project-image" className="text-foreground">Image URL</Label>
                           <Input
                             id="project-image"
-                            value={projectForm.imgSrc}
-                            onChange={(e) => setProjectForm({ ...projectForm, imgSrc: e.target.value })}
+                            value={projectForm.img_src}
+                            onChange={(e) => setProjectForm({ ...projectForm, img_src: e.target.value })}
                             className="bg-background text-foreground border-border"
                             placeholder="https://example.com/image.jpg"
                           />

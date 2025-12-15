@@ -82,7 +82,7 @@ export default function ProjectDetailPage({ theme, onThemeToggle, projects }: Pr
 
           <div className="mb-16">
             <img 
-              src={project.imgSrc}
+              src={project.img_src}
               alt={project.title}
               className="w-full rounded-lg"
               loading="lazy"

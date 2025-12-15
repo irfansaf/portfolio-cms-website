@@ -1,9 +1,9 @@
 export interface Project {
-  id: string;
+  id: string | number;
   slug: string;
   title: string;
   description: string;
-  imgSrc: string;
+  img_src: string;
   role: string;
   technologies: string[];
   overview: string;
@@ -13,7 +13,7 @@ export interface Project {
 }
 
 export interface DiaryEntry {
-  id: string;
+  id: string | number;
   slug: string;
   title: string;
   excerpt: string;
