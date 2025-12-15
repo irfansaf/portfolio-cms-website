@@ -20,6 +20,8 @@ func Register(h *server.Hertz) {
 		api.GET("/projects/:slug", handler.NewProjectHandler().GetProject)
 		api.GET("/diaries", handler.NewDiaryHandler().GetDiaries)
 		api.GET("/diaries/:slug", handler.NewDiaryHandler().GetDiary)
+		api.GET("/skills", handler.NewSkillHandler().GetSkills)
+		api.GET("/experiences", handler.NewExperienceHandler().GetExperiences)
 
 		// Protected APIs
 		// TODO: Add JWT Middleware here for the following routes
@@ -38,6 +40,20 @@ func Register(h *server.Hertz) {
 			diaries.POST("/", handler.NewDiaryHandler().CreateDiary)
 			diaries.PUT("/:id", handler.NewDiaryHandler().UpdateDiary)
 			diaries.DELETE("/:id", handler.NewDiaryHandler().DeleteDiary)
+		}
+
+		skills := api.Group("/skills")
+		{
+			skills.POST("/", handler.NewSkillHandler().CreateSkill)
+			skills.PUT("/:id", handler.NewSkillHandler().UpdateSkill)
+			skills.DELETE("/:id", handler.NewSkillHandler().DeleteSkill)
+		}
+
+		experiences := api.Group("/experiences")
+		{
+			experiences.POST("/", handler.NewExperienceHandler().CreateExperience)
+			experiences.PUT("/:id", handler.NewExperienceHandler().UpdateExperience)
+			experiences.DELETE("/:id", handler.NewExperienceHandler().DeleteExperience)
 		}
 	}
 

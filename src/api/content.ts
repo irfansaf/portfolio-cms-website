@@ -1,5 +1,5 @@
 import client from './client';
-import { Project, DiaryEntry } from '@/types';
+import { Project, DiaryEntry, Skill, Experience } from '@/types';
 
 // Projects
 export const getProjects = async (): Promise<Project[]> => {
@@ -41,4 +41,38 @@ export const updateDiary = async (id: string | number, data: Partial<DiaryEntry>
 
 export const deleteDiary = async (id: string | number): Promise<void> => {
   return client.delete(`/diaries/${id}`);
+};
+
+// Skills
+export const getSkills = async (): Promise<Skill[]> => {
+  return client.get<Skill[]>('/skills');
+};
+
+export const createSkill = async (data: Partial<Skill>): Promise<Skill> => {
+  return client.post<Skill>('/skills/', data);
+};
+
+export const updateSkill = async (id: string | number, data: Partial<Skill>): Promise<Skill> => {
+  return client.put<Skill>(`/skills/${id}`, data);
+};
+
+export const deleteSkill = async (id: string | number): Promise<void> => {
+  return client.delete(`/skills/${id}`);
+};
+
+// Experiences
+export const getExperiences = async (): Promise<Experience[]> => {
+  return client.get<Experience[]>('/experiences');
+};
+
+export const createExperience = async (data: Partial<Experience>): Promise<Experience> => {
+  return client.post<Experience>('/experiences/', data);
+};
+
+export const updateExperience = async (id: string | number, data: Partial<Experience>): Promise<Experience> => {
+  return client.put<Experience>(`/experiences/${id}`, data);
+};
+
+export const deleteExperience = async (id: string | number): Promise<void> => {
+  return client.delete(`/experiences/${id}`);
 };

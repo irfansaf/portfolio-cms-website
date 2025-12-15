@@ -22,6 +22,21 @@ export interface DiaryEntry {
   visibility: 'public' | 'private';
 }
 
+export interface Skill {
+  id: string | number;
+  category: string;
+  items: string[];
+}
+
+export interface Experience {
+  id: string | number;
+  title: string;
+  company: string;
+  start_date: string;
+  end_date?: string | null;
+  description: string;
+}
+
 export interface NavItem {
   label: string;
   href: string;

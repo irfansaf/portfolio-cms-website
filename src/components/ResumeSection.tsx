@@ -1,16 +1,32 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, Code, Database, Cloud, GitBranch } from 'lucide-react';
+import { Download, Code, Database, Cloud, GitBranch, Briefcase } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Skill, Experience } from '@/types';
 
-export default function ResumeSection() {
-  const skills = [
-    { category: 'Frontend', items: ['React', 'TypeScript', 'Next.js', 'Tailwind CSS'], icon: Code },
-    { category: 'Backend', items: ['Node.js', 'Go', 'Python', 'REST APIs'], icon: Database },
-    { category: 'DevOps', items: ['Docker', 'Kubernetes', 'AWS', 'CI/CD'], icon: Cloud },
-    { category: 'Tools', items: ['Git', 'Linux', 'PostgreSQL', 'Redis'], icon: GitBranch },
-  ];
+interface ResumeSectionProps {
+  skills: Skill[];
+  experiences: Experience[];
+}
 
+// Map common categories to icons
+const getCategoryIcon = (category: string) => {
+  const normalized = category.toLowerCase();
+  if (normalized.includes('frontend') || normalized.includes('web')) return Code;
+  if (normalized.includes('backend') || normalized.includes('api')) return Database;
+  if (normalized.includes('devops') || normalized.includes('cloud')) return Cloud;
+  if (normalized.includes('tool')) return GitBranch;
+  return Briefcase; // Default
+};
+
+// Helper to format date range
+const formatDateRange = (startDate: string, endDate?: string | null) => {
+  const start = new Date(startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  const end = endDate ? new Date(endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Present';
+  return `${start} - ${end}`;
+};
+
+export default function ResumeSection({ skills, experiences }: ResumeSectionProps) {
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -33,7 +49,7 @@ export default function ResumeSection() {
           Skills & Experience
         </h2>
         <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-          5+ years of experience building scalable applications and distributed systems
+          Overview of my technical expertise and professional journey
         </p>
         <Button 
           size="lg"
@@ -44,17 +60,18 @@ export default function ResumeSection() {
         </Button>
       </div>
 
-      <motion.div
-        variants={container}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true }}
-        className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
-      >
+      {skills.length > 0 && (
+        <motion.div
+          variants={container}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
         {skills.map((skillGroup) => {
-          const Icon = skillGroup.icon;
+          const Icon = getCategoryIcon(skillGroup.category);
           return (
-            <motion.div key={skillGroup.category} variants={item}>
+            <motion.div key={skillGroup.id} variants={item}>
               <Card className="h-full hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
@@ -64,8 +81,8 @@ export default function ResumeSection() {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
-                    {skillGroup.items.map((skill) => (
-                      <li key={skill} className="text-muted-foreground flex items-center">
+                    {skillGroup.items.map((skill, index) => (
+                      <li key={index} className="text-muted-foreground flex items-center">
                         <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
                         {skill}
                       </li>
@@ -76,7 +93,8 @@ export default function ResumeSection() {
             </motion.div>
           );
         })}
-      </motion.div>
+        </motion.div>
+      )}
 
       <Card>
         <CardHeader>
@@ -86,25 +104,47 @@ export default function ResumeSection() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="border-l-2 border-primary pl-6 space-y-6">
-            <div>
-              <h3 className="font-semibold text-lg text-foreground">Senior Software Engineer</h3>
-              <p className="text-sm text-muted-foreground mb-2">Tech Company • 2022 - Present</p>
-              <ul className="space-y-2 text-foreground">
-                <li>• Led development of microservices architecture serving 1M+ users</li>
-                <li>• Reduced API response time by 70% through optimization</li>
-                <li>• Mentored junior developers and conducted code reviews</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg text-foreground">Software Engineer</h3>
-              <p className="text-sm text-muted-foreground mb-2">Startup Inc • 2020 - 2022</p>
-              <ul className="space-y-2 text-foreground">
-                <li>• Built full-stack features using React and Node.js</li>
-                <li>• Implemented CI/CD pipelines reducing deployment time by 80%</li>
-                <li>• Collaborated with cross-functional teams on product development</li>
-              </ul>
-            </div>
+          <div className="space-y-8">
+            {Object.entries(
+              experiences.reduce((acc, exp) => {
+                const group = acc[exp.company] || [];
+                group.push(exp);
+                acc[exp.company] = group;
+                return acc;
+              }, {} as Record<string, Experience[]>)
+            ).map(([company, companyExperiences], index) => (
+              <div key={index} className="relative border-l-2 border-primary/20 pl-6 pb-2 last:pb-0">
+                {/* Company Label */}
+                <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-primary ring-4 ring-background" />
+                <h3 className="text-xl font-bold text-foreground mb-4">{company}</h3>
+                
+                {/* Roles within the company */}
+                <div className="space-y-8">
+                  {companyExperiences.map((exp, expIndex) => (
+                    <div key={exp.id} className="relative">
+                      {expIndex !== companyExperiences.length - 1 && (
+                         <div className="absolute left-[-25px] top-6 bottom-[-32px] w-0.5 bg-primary/20" />
+                      )}
+                      
+                      <div className="group">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-2">
+                          <h4 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors">
+                            {exp.title}
+                          </h4>
+                          <span className="text-sm font-medium text-muted-foreground bg-muted px-2 py-1 rounded">
+                            {formatDateRange(exp.start_date, exp.end_date)}
+                          </span>
+                        </div>
+                        <div 
+                          className="prose prose-sm prose-neutral dark:prose-invert max-w-none text-muted-foreground"
+                          dangerouslySetInnerHTML={{ __html: exp.description }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>

@@ -8,7 +8,7 @@ import DiaryGrid from '../components/DiaryGrid';
 import ResumeSection from '../components/ResumeSection';
 import ContactForm from '../components/ContactForm';
 import Footer from '../components/Footer';
-import { Project, DiaryEntry } from '../types';
+import { Project, DiaryEntry, Skill, Experience } from '../types';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,9 +17,11 @@ interface HomePageProps {
   onThemeToggle: () => void;
   projects: Project[];
   diaryEntries: DiaryEntry[];
+  skills: Skill[];
+  experiences: Experience[];
 }
 
-export default function HomePage({ theme, onThemeToggle, projects, diaryEntries }: HomePageProps) {
+export default function HomePage({ theme, onThemeToggle, projects, diaryEntries, skills, experiences }: HomePageProps) {
   const portfolioRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -67,7 +69,7 @@ export default function HomePage({ theme, onThemeToggle, projects, diaryEntries 
 
         <section id="resume" className="py-24 px-8 bg-background">
           <div className="max-w-4xl mx-auto">
-            <ResumeSection />
+            <ResumeSection skills={skills} experiences={experiences} />
           </div>
         </section>
 

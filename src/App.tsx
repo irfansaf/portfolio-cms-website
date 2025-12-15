@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Toaster } from '@/components/ui/toaster';
 import HomePage from './pages/HomePage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
@@ -7,9 +7,9 @@ import DiaryDetailPage from './pages/DiaryDetailPage';
 import CMSDashboard from './pages/CMSDashboard';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import { Project, DiaryEntry } from './types';
+import { Project, DiaryEntry, Skill, Experience } from './types';
 
-import { getProjects, getDiaries } from '@/api/content';
+import { getProjects, getDiaries, getSkills, getExperiences } from '@/api/content';
 
 function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -18,21 +18,31 @@ function App() {
   });
   const [projects, setProjects] = useState<Project[]>([]);
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([]);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
 
   const fetchData = async () => {
     try {
-      const [fetchedProjects, fetchedDiaries] = await Promise.all([
+      const [fetchedProjects, fetchedDiaries, fetchedSkills, fetchedExperiences] = await Promise.all([
         getProjects(),
-        getDiaries()
+        getDiaries(),
+        getSkills(),
+        getExperiences()
       ]);
       setProjects(fetchedProjects);
       setDiaryEntries(fetchedDiaries);
+      setSkills(fetchedSkills);
+      setExperiences(fetchedExperiences);
     } catch (error) {
       console.error("Failed to fetch content:", error);
     }
   };
 
+  const fetchedRef = useRef(false);
+
   useEffect(() => {
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
     fetchData();
   }, []);
 
@@ -57,6 +67,8 @@ function App() {
               onThemeToggle={toggleTheme}
               projects={projects}
               diaryEntries={diaryEntries.filter(entry => entry.visibility === 'public')}
+              skills={skills}
+              experiences={experiences}
             />
           } 
         />
@@ -98,6 +110,10 @@ function App() {
               diaryEntries={diaryEntries}
               onUpdateProjects={() => fetchData()}
               onUpdateDiaries={() => fetchData()}
+              skills={skills}
+              experiences={experiences}
+              onUpdateSkills={() => fetchData()}
+              onUpdateExperiences={() => fetchData()}
             />
           } 
         />
