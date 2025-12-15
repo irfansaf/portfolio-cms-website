@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8888/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8888/api';
 
 interface RequestOptions extends RequestInit {
   headers?: Record<string, string>;

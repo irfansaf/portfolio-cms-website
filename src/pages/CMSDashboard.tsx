@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import NavBar from '../components/NavBar';
-import Footer from '../components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -17,7 +14,7 @@ import {
   createSkill, updateSkill, deleteSkill,
   createExperience, updateExperience, deleteExperience
 } from '@/api/content';
-import { LogOut, Plus, Pencil, Trash2 } from 'lucide-react';
+import { LogOut, Plus, Pencil, Trash2, LayoutDashboard, FolderOpen, BookOpen, GraduationCap, Briefcase } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface CMSDashboardProps {
@@ -372,49 +369,135 @@ export default function CMSDashboard({
     }
   };
 
+  // View state
+  const [activeView, setActiveView] = useState<'overview' | 'projects' | 'diaries' | 'skills' | 'experience'>('overview');
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
+  // Sidebar Items
+  const navItems = [
+    { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'projects', label: 'Projects', icon: FolderOpen },
+    { id: 'diaries', label: 'Diaries', icon: BookOpen },
+    { id: 'skills', label: 'Skills', icon: GraduationCap },
+    { id: 'experience', label: 'Experience', icon: Briefcase },
+  ];
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <NavBar currentPage="cms" theme={theme} onThemeToggle={onThemeToggle} />
-      
-      <main className="py-32 px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-12">
-            <h1 className="font-headline text-4xl font-bold text-foreground">CMS Dashboard</h1>
-            <Button 
-              onClick={onLogout}
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
-            >
-              <LogOut className="w-5 h-5 mr-2" />
-              Logout
-            </Button>
+    <div className="min-h-screen bg-background text-foreground flex">
+      {/* Sidebar */}
+      <aside className="w-64 bg-card border-r border-border h-screen fixed left-0 top-0 overflow-y-auto hidden md:flex flex-col">
+        <div className="p-6 border-b border-border">
+          <h1 className="font-headline text-2xl font-bold text-primary flex items-center gap-2">
+            <LayoutDashboard className="w-6 h-6" />
+            CMS Admin
+          </h1>
+        </div>
+        
+        <nav className="flex-1 p-4 space-y-2">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeView === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveView(item.id as any)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                  isActive 
+                    ? 'bg-primary text-primary-foreground shadow-md' 
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="font-medium">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="p-4 border-t border-border">
+          <Button 
+            onClick={onLogout}
+            variant="ghost"
+            className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+          >
+            <LogOut className="w-5 h-5 mr-3" />
+            Sign Out
+          </Button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 md:ml-64 min-h-screen bg-background/50">
+        {/* Mobile Header (TODO: Add functionality if needed) */}
+        
+        <div className="p-8 max-w-7xl mx-auto space-y-8">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-8">
+             <div>
+              <h2 className="text-3xl font-bold text-foreground capitalize">{activeView}</h2>
+              <p className="text-muted-foreground">Manage your content and portfolio settings</p>
+             </div>
+             <div className="flex items-center gap-4">
+                <Button variant="outline" size="icon" onClick={onThemeToggle}>
+                   {theme === 'light' ? '🌙' : '☀️'}
+                </Button>
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                  JS
+                </div>
+             </div>
           </div>
 
-          <Tabs defaultValue="portfolio" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-8">
-              <TabsTrigger value="portfolio" className="text-foreground">Portfolio</TabsTrigger>
-              <TabsTrigger value="diaries" className="text-foreground">Diaries</TabsTrigger>
-              <TabsTrigger value="skills" className="text-foreground">Skills</TabsTrigger>
-              <TabsTrigger value="experience" className="text-foreground">Experience</TabsTrigger>
-            </TabsList>
+          {/* View Content */}
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {activeView === 'overview' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  { label: 'Total Projects', value: projects.length, icon: FolderOpen, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+                  { label: 'Diary Entries', value: diaryEntries.length, icon: BookOpen, color: 'text-green-500', bg: 'bg-green-500/10' },
+                  { label: 'Skill Categories', value: skills.length, icon: GraduationCap, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+                  { label: 'Experience', value: experiences.length, icon: Briefcase, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+                ].map((stat, i) => (
+                  <Card key={i} className="border-border hover:shadow-lg transition-shadow">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        {stat.label}
+                      </CardTitle>
+                      <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{stat.value}</div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        +0% from last month
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+                
+                {/* Recent Activity or Quick Actions could go here */}
+                <Card className="md:col-span-2 lg:col-span-4 mt-6">
+                    <CardHeader>
+                        <CardTitle>Welcome back!</CardTitle>
+                        <CardDescription>Select a module from the sidebar to start managing your content.</CardDescription>
+                    </CardHeader>
+                </Card>
+              </div>
+            )}
 
-            <TabsContent value="portfolio">
+            {activeView === 'projects' && (
               <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="font-headline text-2xl font-bold text-foreground">
-                    Manage Portfolio Items
-                  </h2>
-                  <Dialog open={projectDialogOpen} onOpenChange={setProjectDialogOpen}>
+                <div className="flex justify-between items-center bg-card p-4 rounded-lg border border-border shadow-sm">
+                  <div className="space-y-1">
+                     <h3 className="font-semibold text-lg">Projects Library</h3>
+                     <p className="text-sm text-muted-foreground">Showcase your work</p>
+                  </div>
+                   <Dialog open={projectDialogOpen} onOpenChange={setProjectDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button 
-                        onClick={handleAddProject}
-                        className="bg-primary text-primary-foreground hover:bg-primary/90"
-                      >
+                      <Button onClick={handleAddProject} className="shadow-lg shadow-primary/20">
                         <Plus className="w-5 h-5 mr-2" />
-                        Add New Project
+                        New Project
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -513,60 +596,42 @@ export default function CMSDashboard({
                   </Dialog>
                 </div>
 
-                <div className="grid gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {projects.map((project) => (
-                    <Card key={project.id}>
+                    <Card key={project.id} className="group hover:border-primary/50 transition-all duration-300 hover:shadow-xl">
+                      <div className="h-40 w-full overflow-hidden rounded-t-lg bg-muted relative">
+                           {project.img_src && <img src={project.img_src} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />}
+                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                                <div className="flex gap-2 w-full">
+                                    <Button size="sm" onClick={() => handleEditProject(project)} className="flex-1 bg-white/90 text-black hover:bg-white"><Pencil className="w-4 h-4 mr-2" /> Edit</Button>
+                                    <Button size="sm" onClick={() => handleDeleteProject(project.id)} variant="destructive" className="flex-1"><Trash2 className="w-4 h-4 mr-2" /> Delete</Button>
+                                </div>
+                           </div>
+                      </div>
                       <CardHeader>
-                        <CardTitle className="text-foreground">{project.title}</CardTitle>
-                        <CardDescription className="text-muted-foreground">
+                        <CardTitle className="truncate">{project.title}</CardTitle>
+                        <CardDescription className="line-clamp-2">
                           {project.description}
                         </CardDescription>
                       </CardHeader>
-                      <CardContent>
-                        <div className="flex gap-4">
-                          <Button 
-                            onClick={() => navigate(`/project/${project.slug}`)}
-                            className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
-                          >
-                            View
-                          </Button>
-                          <Button 
-                            onClick={() => handleEditProject(project)}
-                            className="bg-primary text-primary-foreground hover:bg-primary/90"
-                          >
-                            <Pencil className="w-4 h-4 mr-2" />
-                            Edit
-                          </Button>
-                          <Button 
-                            onClick={() => handleDeleteProject(project.id)}
-                            variant="outline"
-                            className="text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Delete
-                          </Button>
-                        </div>
-                      </CardContent>
                     </Card>
                   ))}
                 </div>
               </div>
-            </TabsContent>
+            )}
 
-            <TabsContent value="diaries">
+            {activeView === 'diaries' && (
               <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="font-headline text-2xl font-bold text-foreground">
-                    Manage Diary Entries
-                  </h2>
-                  <Dialog open={diaryDialogOpen} onOpenChange={setDiaryDialogOpen}>
+                <div className="flex justify-between items-center bg-card p-4 rounded-lg border border-border">
+                   <div>
+                       <h3 className="font-semibold text-lg">Diary Entries</h3>
+                       <p className="text-sm text-muted-foreground">Thoughts & Updates</p>
+                   </div>
+                   <Dialog open={diaryDialogOpen} onOpenChange={setDiaryDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button 
-                        onClick={handleAddDiary}
-                        className="bg-primary text-primary-foreground hover:bg-primary/90"
-                      >
+                      <Button onClick={handleAddDiary} className="shadow-lg">
                         <Plus className="w-5 h-5 mr-2" />
-                        Add New Entry
+                        New Entry
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -574,9 +639,6 @@ export default function CMSDashboard({
                         <DialogTitle className="text-foreground">
                           {editingDiary ? 'Edit Diary Entry' : 'Add New Diary Entry'}
                         </DialogTitle>
-                        <DialogDescription className="text-muted-foreground">
-                          Fill in the diary entry details below
-                        </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
                         <div className="space-y-2">
@@ -641,10 +703,10 @@ export default function CMSDashboard({
                     </DialogContent>
                   </Dialog>
                 </div>
-
-                <div className="grid gap-6">
+                
+                <div className="space-y-4">
                   {diaryEntries.map((entry) => (
-                    <Card key={entry.id}>
+                    <Card key={entry.id} className="hover:shadow-md transition-shadow">
                       <CardHeader>
                         <div className="flex justify-between items-start">
                           <div>
@@ -654,36 +716,38 @@ export default function CMSDashboard({
                             </CardDescription>
                           </div>
                           <span 
-                            className={`px-3 py-1 rounded-md text-sm ${
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${
                               entry.visibility === 'public' 
-                                ? 'bg-success text-white' 
-                                : 'bg-gray-500 text-white'
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
+                                : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
                             }`}
                           >
-                            {entry.visibility}
+                            {entry.visibility.toUpperCase()}
                           </span>
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-muted-foreground mb-4">{entry.excerpt}</p>
-                        <div className="flex gap-4">
+                        <p className="text-muted-foreground mb-4 line-clamp-2">{entry.excerpt}</p>
+                        <div className="flex gap-2">
                           <Button 
+                            size="sm"
                             onClick={() => navigate(`/diary/${entry.slug}`)}
-                            className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
+                            variant="secondary"
                           >
                             View
                           </Button>
                           <Button 
+                            size="sm"
                             onClick={() => handleEditDiary(entry)}
-                            className="bg-primary text-primary-foreground hover:bg-primary/90"
                           >
                             <Pencil className="w-4 h-4 mr-2" />
                             Edit
                           </Button>
                           <Button 
+                            size="sm"
                             onClick={() => handleDeleteDiary(entry.id)}
                             variant="outline"
-                            className="text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+                            className="text-red-500 hover:bg-red-50 dark:hover:bg-red-950"
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
@@ -694,16 +758,19 @@ export default function CMSDashboard({
                   ))}
                 </div>
               </div>
-            </TabsContent>
+            )}
 
-            <TabsContent value="skills">
+            {activeView === 'skills' && (
               <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="font-headline text-2xl font-bold text-foreground">Manage Skills</h2>
+                 <div className="flex justify-between items-center bg-card p-4 rounded-lg border border-border">
+                   <div>
+                       <h3 className="font-semibold text-lg">Skills & Tech Stack</h3>
+                       <p className="text-sm text-muted-foreground">Manage your expertise</p>
+                   </div>
                   <Dialog open={skillDialogOpen} onOpenChange={setSkillDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button onClick={handleAddSkill} className="bg-primary text-primary-foreground hover:bg-primary/90">
-                        <Plus className="w-5 h-5 mr-2" /> Add Skill Category
+                      <Button onClick={handleAddSkill}>
+                        <Plus className="w-5 h-5 mr-2" /> Add Category
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="bg-background border-border">
@@ -732,7 +799,7 @@ export default function CMSDashboard({
                           />
                         </div>
                         <div className="flex gap-4 pt-4">
-                          <Button onClick={handleSaveSkill} className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90">Save</Button>
+                          <Button onClick={handleSaveSkill} className="flex-1">Save</Button>
                           <Button onClick={() => setSkillDialogOpen(false)} variant="outline" className="flex-1">Cancel</Button>
                         </div>
                       </div>
@@ -741,34 +808,37 @@ export default function CMSDashboard({
                 </div>
                 <div className="grid md:grid-cols-2 gap-6">
                   {skills.map(skill => (
-                    <Card key={skill.id}>
-                      <CardHeader>
+                    <Card key={skill.id} className="hover:border-primary/50 transition-colors">
+                      <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="text-foreground">{skill.category}</CardTitle>
+                        <div className="flex gap-1">
+                          <Button size="icon" variant="ghost" onClick={() => handleEditSkill(skill)}><Pencil className="w-4 h-4 text-muted-foreground" /></Button>
+                          <Button size="icon" variant="ghost" onClick={() => handleDeleteSkill(skill.id)}><Trash2 className="w-4 h-4 text-red-500" /></Button>
+                        </div>
                       </CardHeader>
                       <CardContent>
-                        <div className="flex flex-wrap gap-2 mb-4">
+                        <div className="flex flex-wrap gap-2">
                           {skill.items.map((item, i) => (
-                            <span key={i} className="bg-muted text-muted-foreground px-2 py-1 rounded text-sm">{item}</span>
+                            <span key={i} className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm font-medium">{item}</span>
                           ))}
-                        </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" onClick={() => handleEditSkill(skill)} className="bg-primary text-primary-foreground hover:bg-primary/90"><Pencil className="w-4 h-4" /></Button>
-                          <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50 dark:hover:bg-red-950" onClick={() => handleDeleteSkill(skill.id)}><Trash2 className="w-4 h-4" /></Button>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
               </div>
-            </TabsContent>
+            )}
 
-            <TabsContent value="experience">
+            {activeView === 'experience' && (
               <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="font-headline text-2xl font-bold text-foreground">Manage Experience</h2>
+                <div className="flex justify-between items-center bg-card p-4 rounded-lg border border-border">
+                   <div>
+                       <h3 className="font-semibold text-lg">Professional Experience</h3>
+                       <p className="text-sm text-muted-foreground">Work history and roles</p>
+                   </div>
                   <Dialog open={experienceDialogOpen} onOpenChange={setExperienceDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button onClick={handleAddExperience} className="bg-primary text-primary-foreground hover:bg-primary/90">
+                      <Button onClick={handleAddExperience}>
                         <Plus className="w-5 h-5 mr-2" /> Add Experience
                       </Button>
                     </DialogTrigger>
@@ -804,7 +874,7 @@ export default function CMSDashboard({
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label className="text-foreground">End Date (Leave empty for Present)</Label>
+                            <Label className="text-foreground">End Date</Label>
                             <Input 
                               type="date"
                               value={experienceForm.end_date} 
@@ -821,38 +891,38 @@ export default function CMSDashboard({
                           />
                         </div>
                         <div className="flex gap-4 pt-4">
-                          <Button onClick={handleSaveExperience} className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90">Save</Button>
+                          <Button onClick={handleSaveExperience} className="flex-1">Save</Button>
                           <Button onClick={() => setExperienceDialogOpen(false)} variant="outline" className="flex-1">Cancel</Button>
                         </div>
                       </div>
                     </DialogContent>
                   </Dialog>
                 </div>
-                <div className="space-y-4">
+                <div className="grid gap-4">
                   {experiences.map(exp => (
-                    <Card key={exp.id}>
-                      <CardHeader>
-                        <CardTitle className="text-foreground">{exp.title} <span className="text-muted-foreground text-sm font-normal">at {exp.company}</span></CardTitle>
-                        <CardDescription className="text-muted-foreground">
-                          {new Date(exp.start_date).toLocaleDateString()} - {exp.end_date ? new Date(exp.end_date).toLocaleDateString() : 'Present'}
-                        </CardDescription>
+                    <Card key={exp.id} className="hover:border-primary/50 transition-all">
+                      <CardHeader className="flex flex-row items-start justify-between">
+                         <div>
+                            <CardTitle className="text-xl text-foreground mb-1">{exp.title}</CardTitle>
+                            <p className="text-md font-medium text-primary">{exp.company}</p>
+                            <CardDescription className="text-muted-foreground mt-1">
+                              {new Date(exp.start_date).toLocaleDateString()} - {exp.end_date ? new Date(exp.end_date).toLocaleDateString() : 'Present'}
+                            </CardDescription>
+                         </div>
+                         <div className="flex gap-2">
+                           <Button size="icon" variant="ghost" onClick={() => handleEditExperience(exp)}><Pencil className="w-4 h-4" /></Button>
+                           <Button size="icon" variant="ghost" className="text-red-500" onClick={() => handleDeleteExperience(exp.id)}><Trash2 className="w-4 h-4" /></Button>
+                         </div>
                       </CardHeader>
-                      <CardContent>
-                        <div className="flex gap-2">
-                          <Button size="sm" onClick={() => handleEditExperience(exp)} className="bg-primary text-primary-foreground hover:bg-primary/90"><Pencil className="w-4 h-4" /></Button>
-                          <Button size="sm" variant="outline" className="text-red-600 hover:bg-red-50 dark:hover:bg-red-950" onClick={() => handleDeleteExperience(exp.id)}><Trash2 className="w-4 h-4" /></Button>
-                        </div>
-                      </CardContent>
                     </Card>
                   ))}
                 </div>
               </div>
-            </TabsContent>
-          </Tabs>
+            )}
+          </div>
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }
