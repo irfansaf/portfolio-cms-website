@@ -12,21 +12,24 @@ import {
 import { Menu, X, Moon, Sun } from 'lucide-react';
 
 interface NavBarProps {
+  siteName: string;
   theme: 'light' | 'dark';
   onThemeToggle: () => void;
 }
 
-export default function NavBar({ theme, onThemeToggle }: NavBarProps) {
+export default function NavBar({ siteName, theme, onThemeToggle }: NavBarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
 
   const menuItems: { label: string; href: string }[] = [
     { label: 'About', href: '/#about' },
-    { label: 'Portfolio', href: '/portfolio' },
+    { label: siteName, href: '/portfolio' }, // Also update link label? Maybe keep "Portfolio" as section name.
     { label: 'Diaries', href: '/diaries' },
     { label: 'Resume', href: '/#resume' },
     { label: 'Contact', href: '/#contact' },
   ];
+  // Keeping "Portfolio" in menu items for now as it refers to the section/page.
+  // Only updating the Logo/Brand name.
 
   const handleNavClick = (href: string, e?: React.MouseEvent) => {
     setMobileMenuOpen(false);
@@ -57,7 +60,7 @@ export default function NavBar({ theme, onThemeToggle }: NavBarProps) {
           to="/" 
           className="font-headline text-2xl font-bold text-foreground hover:text-primary transition-colors"
         >
-          Portfolio
+          {siteName}
         </Link>
 
         <div className="hidden md:flex items-center gap-8">

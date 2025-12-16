@@ -15,4 +15,5 @@ export default [
   ]),
   route("login", "modules/auth/pages/LoginPage.tsx"),
   route("register", "modules/auth/pages/RegisterPage.tsx"),
+  route("setup", "modules/shared/pages/InitPage.tsx"),
 ] satisfies RouteConfig;

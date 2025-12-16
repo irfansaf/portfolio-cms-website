@@ -5,7 +5,7 @@ import * as LucideIcons from 'lucide-react';
 import type { AppContext } from '@/modules/shared/types';
 
 export default function Footer() {
-  const { socialLinks } = useOutletContext<AppContext>();
+  const { socialLinks, siteName } = useOutletContext<AppContext>();
   const currentYear = new Date().getFullYear();
 
   const quickLinks: { label: string; href: string }[] = [
@@ -21,7 +21,7 @@ export default function Footer() {
         <div className="grid md:grid-cols-3 gap-12 mb-12">
           <div>
             <h3 className="font-headline text-xl font-bold mb-4 text-foreground">
-              Portfolio
+              {siteName}
             </h3>
             <p className="text-muted-foreground">
               Creative developer and designer crafting beautiful digital experiences.
@@ -80,6 +80,7 @@ export default function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-muted-foreground hover:text-primary transition-colors"
+                    title={link.platform}
                   >
                     <Icon className="w-5 h-5" />
                   </a>
@@ -92,7 +93,7 @@ export default function Footer() {
         <Separator className="mb-8" />
 
         <div className="text-center text-muted-foreground">
-          <p>© {currentYear} Portfolio. All rights reserved.</p>
+          <p>© {currentYear} {siteName}. All rights reserved.</p>
         </div>
       </div>
     </footer>

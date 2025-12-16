@@ -51,6 +51,7 @@ export interface NavItem {
 }
 
 export interface AppContext {
+  siteName: string;
   theme: 'light' | 'dark';
   toggleTheme: () => void;
   projects: Project[];

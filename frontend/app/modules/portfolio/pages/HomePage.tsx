@@ -14,7 +14,7 @@ import type { AppContext } from '@/modules/shared/types';
 gsap.registerPlugin(ScrollTrigger);
 
 export default function HomePage() {
-  const { theme, onThemeToggle, projects, diaryEntries, skills, experiences } = useOutletContext<AppContext>();
+  const { theme, onThemeToggle, projects, diaryEntries, skills, experiences, siteName } = useOutletContext<AppContext>();
   
   // existing logic...
   const portfolioRef = useRef<HTMLElement>(null);
@@ -30,6 +30,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <NavBar 
+        siteName={siteName}
         theme={theme}
         onThemeToggle={onThemeToggle}
       />

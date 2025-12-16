@@ -14,6 +14,7 @@ import (
 	projectDomain "backend/internal/modules/project/domain"
 	resumeDomain "backend/internal/modules/resume/domain"
 	socialDomain "backend/internal/modules/social/domain"
+	systemDomain "backend/internal/modules/system/domain"
 	authDomain "backend/internal/modules/user/domain"
 
 	// Handlers
@@ -22,6 +23,7 @@ import (
 	projectHandler "backend/internal/modules/project/handler"
 	resumeHandler "backend/internal/modules/resume/handler"
 	socialHandler "backend/internal/modules/social/handler"
+	systemHandler "backend/internal/modules/system/handler"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
@@ -44,6 +46,7 @@ func main() {
 		&resumeDomain.Experience{},
 		&resumeDomain.Skill{},
 		&socialDomain.SocialLinkGorm{},
+		&systemDomain.SystemConfig{},
 	)
 	if err != nil {
 		log.Fatalf("failed to migrate database: %v", err)
@@ -59,6 +62,7 @@ func main() {
 	resumeExpH := resumeHandler.NewExperienceHandler()
 	resumeSkillH := resumeHandler.NewSkillHandler()
 	socialH := socialHandler.NewSocialLinkHandler()
+	systemH := systemHandler.NewSystemHandler()
 
 	// 6. Register Routes
 	h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
@@ -67,6 +71,11 @@ func main() {
 
 	api := h.Group("/api")
 	{
+		// System (No middleware preferred for status/setup, or specific checks)
+		sys := api.Group("/system")
+		sys.GET("/status", systemH.GetStatus)
+		sys.POST("/setup", systemH.Setup)
+
 		// Auth
 		auth := api.Group("/auth")
 		auth.POST("/register", authH.Register)

@@ -43,3 +43,11 @@ func (r *PostgresUserRepository) FindByEmailOrUsername(ctx context.Context, emai
 	}
 	return &user, nil
 }
+
+func (r *PostgresUserRepository) Count(ctx context.Context) (int64, error) {
+	var count int64
+	if err := db.DB.WithContext(ctx).Model(&domain.User{}).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}

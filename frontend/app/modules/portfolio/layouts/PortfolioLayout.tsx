@@ -1,8 +1,10 @@
 import { Outlet } from 'react-router';
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { Toaster } from '@/modules/shared/ui/toaster';
 import type { Project, DiaryEntry, Skill, Experience, SocialLink } from '@/modules/shared/types';
 import { getProjects, getDiaries, getSkills, getExperiences, getSocialLinks } from '@/modules/portfolio/api';
+import { getSystemStatus } from '@/modules/shared/api/system';
 
 function PortfolioLayout() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -12,14 +14,26 @@ function PortfolioLayout() {
     }
     return false;
   });
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  
+  const [siteName, setSiteName] = useState('Portfolio');
+  const navigate = useNavigate();
 
   const fetchData = async () => {
     try {
+      // Check system status first
+      const status = await getSystemStatus();
+      if (!status.initialized) {
+        navigate('/setup');
+        return;
+      }
+      setSiteName(status.site_name);
+
       const [fetchedProjects, fetchedDiaries, fetchedSkills, fetchedExperiences, fetchedSocialLinks] = await Promise.all([
         getProjects(),
         getDiaries(),
@@ -33,7 +47,7 @@ function PortfolioLayout() {
       setExperiences(fetchedExperiences);
       setSocialLinks(fetchedSocialLinks);
     } catch (error) {
-      console.error("Failed to fetch content:", error);
+       console.error("Failed to fetch content:", error);
     }
   };
 
@@ -43,7 +57,7 @@ function PortfolioLayout() {
     if (fetchedRef.current) return;
     fetchedRef.current = true;
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -60,6 +74,7 @@ function PortfolioLayout() {
     <>
       <Toaster />
       <Outlet context={{
+        siteName,
         theme,
         toggleTheme,
         projects,
@@ -69,7 +84,7 @@ function PortfolioLayout() {
         socialLinks,
         isAuthenticated,
         logout,
-        fetchData, // exposed for CMS updates
+        fetchData, 
         onUpdateProjects: fetchData,
         onUpdateDiaries: fetchData,
         onUpdateSkills: fetchData,
