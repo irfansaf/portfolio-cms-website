@@ -7,14 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/mod
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/modules/shared/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/modules/shared/ui/select';
 import TiptapEditor from '../components/TiptapEditor';
-import type { Project, DiaryEntry, Skill, Experience, AppContext } from '@/modules/shared/types';
+import type { Project, DiaryEntry, Skill, Experience, SocialLink, AppContext } from '@/modules/shared/types';
 import { 
   createProject, updateProject, deleteProject, 
   createDiary, updateDiary, deleteDiary,
   createSkill, updateSkill, deleteSkill,
-  createExperience, updateExperience, deleteExperience
+  createExperience, updateExperience, deleteExperience,
+  createSocialLink, updateSocialLink, deleteSocialLink
 } from '@/modules/cms/api';
-import { LogOut, Plus, Pencil, Trash2, LayoutDashboard, FolderOpen, BookOpen, GraduationCap, Briefcase } from 'lucide-react';
+import { LogOut, Plus, Pencil, Trash2, LayoutDashboard, FolderOpen, BookOpen, GraduationCap, Briefcase, Link2 } from 'lucide-react';
 import { useToast } from '@/modules/shared/hooks/use-toast';
 
 export default function CMSDashboard() {
@@ -26,11 +27,13 @@ export default function CMSDashboard() {
     projects, 
     diaryEntries, 
     skills, 
-    experiences, 
+    experiences,
+    socialLinks,
     onUpdateProjects, 
     onUpdateDiaries, 
     onUpdateSkills, 
-    onUpdateExperiences 
+    onUpdateExperiences,
+    onUpdateSocialLinks
   } = useOutletContext<AppContext>();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -75,6 +78,16 @@ export default function CMSDashboard() {
     start_date: '',
     end_date: '',
     description: '',
+  });
+
+  // Social Link form state
+  const [socialLinkDialogOpen, setSocialLinkDialogOpen] = useState(false);
+  const [editingSocialLink, setEditingSocialLink] = useState<SocialLink | null>(null);
+  const [socialLinkForm, setSocialLinkForm] = useState({
+    platform: '',
+    url: '',
+    icon: '',
+    is_active: true,
   });
 
   useEffect(() => {
@@ -355,8 +368,62 @@ export default function CMSDashboard() {
     }
   };
 
+  // Social Link handlers
+  const handleAddSocialLink = () => {
+    setEditingSocialLink(null);
+    setSocialLinkForm({ platform: '', url: '', icon: '', is_active: true });
+    setSocialLinkDialogOpen(true);
+  };
+
+  const handleEditSocialLink = (link: SocialLink) => {
+    setEditingSocialLink(link);
+    setSocialLinkForm({
+      platform: link.platform,
+      url: link.url,
+      icon: link.icon,
+      is_active: link.is_active,
+    });
+    setSocialLinkDialogOpen(true);
+  };
+
+  const handleSaveSocialLink = async () => {
+    const newLink: SocialLink = {
+      ID: editingSocialLink?.ID || Date.now(),
+      platform: socialLinkForm.platform,
+      url: socialLinkForm.url,
+      icon: socialLinkForm.icon,
+      is_active: socialLinkForm.is_active,
+    };
+
+    try {
+      if (editingSocialLink) {
+        await updateSocialLink(editingSocialLink.ID, newLink);
+        toast({ title: "Link updated", description: "Social link updated successfully." });
+      } else {
+        await createSocialLink({ ...newLink, ID: undefined });
+        toast({ title: "Link created", description: "New social link created successfully." });
+      }
+      onUpdateSocialLinks();
+      setSocialLinkDialogOpen(false);
+    } catch {
+      toast({ title: "Error", description: "Failed to save social link", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteSocialLink = async (id: string | number) => {
+    if (confirm('Delete this social link?')) {
+      try {
+        await deleteSocialLink(id);
+        onUpdateSocialLinks();
+        toast({ title: "Link deleted", description: "Social link deleted successfully." });
+      } catch {
+        toast({ title: "Error", description: "Failed to delete social link", variant: "destructive" });
+      }
+    }
+  };
+
   // View state
-  const [activeView, setActiveView] = useState<'overview' | 'projects' | 'diaries' | 'skills' | 'experience'>('overview');
+  const [activeView, setActiveView] = useState<'overview' | 'projects' | 'diaries' | 'skills' | 'experience' | 'social-links'>('overview');
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -369,6 +436,7 @@ export default function CMSDashboard() {
     { id: 'diaries', label: 'Diaries', icon: BookOpen },
     { id: 'skills', label: 'Skills', icon: GraduationCap },
     { id: 'experience', label: 'Experience', icon: Briefcase },
+    { id: 'social-links', label: 'Social Links', icon: Link2 },
   ];
 
   return (
@@ -745,6 +813,113 @@ export default function CMSDashboard() {
                 </div>
               </div>
             )}
+
+            {activeView === 'social-links' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center bg-card p-4 rounded-lg border border-border">
+                   <div>
+                       <h3 className="font-semibold text-lg">Social Links</h3>
+                       <p className="text-sm text-muted-foreground">Manage your social profiles</p>
+                   </div>
+                  <Dialog open={socialLinkDialogOpen} onOpenChange={setSocialLinkDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button onClick={handleAddSocialLink}>
+                        <Plus className="w-5 h-5 mr-2" /> Add Link
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-background border-border">
+                      <DialogHeader>
+                        <DialogTitle className="text-foreground">
+                          {editingSocialLink ? 'Edit Link' : 'Add Link'}
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label className="text-foreground">Platform</Label>
+                          <Input 
+                            value={socialLinkForm.platform} 
+                            onChange={e => setSocialLinkForm({ ...socialLinkForm, platform: e.target.value })}
+                            placeholder="e.g. GitHub"
+                            className="bg-background text-foreground border-border"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-foreground">URL</Label>
+                          <Input 
+                            value={socialLinkForm.url} 
+                            onChange={e => setSocialLinkForm({ ...socialLinkForm, url: e.target.value })}
+                            placeholder="https://github.com/username"
+                            className="bg-background text-foreground border-border"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-foreground">Icon (Lucide Name)</Label>
+                          <Input 
+                            value={socialLinkForm.icon} 
+                            onChange={e => setSocialLinkForm({ ...socialLinkForm, icon: e.target.value })}
+                            placeholder="Github, Twitter, Linkedin..."
+                            className="bg-background text-foreground border-border"
+                          />
+                        </div>
+                         <div className="space-y-2">
+                          <Label className="text-foreground">Status</Label>
+                          <Select
+                            value={socialLinkForm.is_active ? 'active' : 'inactive'}
+                            onValueChange={(value) => 
+                              setSocialLinkForm({ ...socialLinkForm, is_active: value === 'active' })
+                            }
+                          >
+                            <SelectTrigger className="bg-background text-foreground border-border">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="active">Active</SelectItem>
+                              <SelectItem value="inactive">Inactive</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex gap-4 pt-4">
+                          <Button onClick={handleSaveSocialLink} className="flex-1">Save</Button>
+                          <Button onClick={() => setSocialLinkDialogOpen(false)} variant="outline" className="flex-1">Cancel</Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {socialLinks.map(link => (
+                    <Card key={link.ID} className="hover:border-primary/50 transition-colors">
+                      <CardHeader className="flex flex-row items-center justify-between">
+                        <div className="flex items-center gap-3">
+                           {/* We could dynamically render icon here if we map string to component, for now just text */}
+                           <div className="p-2 bg-primary/10 rounded-full">
+                              <Link2 className="w-4 h-4 text-primary" />
+                           </div>
+                           <div>
+                              <CardTitle className="text-foreground">{link.platform}</CardTitle>
+                              <CardDescription className="text-xs">
+                                {link.is_active ? <span className="text-green-500">Active</span> : <span className="text-red-500">Inactive</span>}
+                              </CardDescription>
+                           </div>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button size="icon" variant="ghost" onClick={() => handleEditSocialLink(link)}>
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => handleDeleteSocialLink(link.ID)} className="text-destructive hover:text-destructive">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                          <p className="text-sm text-muted-foreground truncate">{link.url}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
 
             {activeView === 'skills' && (
               <div className="space-y-6">

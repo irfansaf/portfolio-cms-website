@@ -1,10 +1,13 @@
+import { useOutletContext } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/modules/shared/ui/button';
 import { Input } from '@/modules/shared/ui/input';
 import { Label } from '@/modules/shared/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/modules/shared/ui/card';
-import { Github, Linkedin, Mail } from 'lucide-react';
+import { Link as LinkIcon } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { useToast } from '@/modules/shared/hooks/use-toast';
+import type { AppContext } from '@/modules/shared/types';
 
 interface ContactFormData {
   name: string;
@@ -13,6 +16,7 @@ interface ContactFormData {
 }
 
 export default function ContactForm() {
+  const { socialLinks } = useOutletContext<AppContext>();
   const { toast } = useToast();
   const {
     register,
@@ -107,42 +111,25 @@ export default function ContactForm() {
             Connect With Me
           </h3>
           <div className="space-y-4">
-            <a
-              href="mailto:hello@example.com"
-              className="flex items-center gap-4 p-4 bg-card rounded-lg hover:bg-muted transition-colors text-foreground"
-            >
-              <Mail className="w-6 h-6 text-primary" />
-              <div>
-                <p className="font-semibold text-foreground">Email</p>
-                <p className="text-muted-foreground">hello@example.com</p>
-              </div>
-            </a>
-
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-4 p-4 bg-card rounded-lg hover:bg-muted transition-colors text-foreground"
-            >
-              <Linkedin className="w-6 h-6 text-primary" />
-              <div>
-                <p className="font-semibold text-foreground">LinkedIn</p>
-                <p className="text-muted-foreground">Connect with me</p>
-              </div>
-            </a>
-
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-4 p-4 bg-card rounded-lg hover:bg-muted transition-colors text-foreground"
-            >
-              <Github className="w-6 h-6 text-primary" />
-              <div>
-                <p className="font-semibold text-foreground">GitHub</p>
-                <p className="text-muted-foreground">View my code</p>
-              </div>
-            </a>
+            {socialLinks.filter(link => link.is_active).map((link) => {
+              // @ts-ignore
+              const Icon = LucideIcons[link.icon] || LinkIcon;
+              return (
+                <a
+                  key={link.ID}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-4 p-4 bg-card rounded-lg hover:bg-muted transition-colors text-foreground"
+                >
+                  <Icon className="w-6 h-6 text-primary" />
+                  <div>
+                    <p className="font-semibold text-foreground">{link.platform}</p>
+                    <p className="text-muted-foreground truncate max-w-[200px]">{link.url}</p>
+                  </div>
+                </a>
+              );
+            })}
           </div>
         </div>
       </div>

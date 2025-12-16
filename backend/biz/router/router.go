@@ -22,6 +22,7 @@ func Register(h *server.Hertz) {
 		api.GET("/diaries/:slug", handler.NewDiaryHandler().GetDiary)
 		api.GET("/skills", handler.NewSkillHandler().GetSkills)
 		api.GET("/experiences", handler.NewExperienceHandler().GetExperiences)
+		api.GET("/social-links", handler.NewSocialLinkHandler().GetSocialLinks)
 
 		// Protected APIs
 		// TODO: Add JWT Middleware here for the following routes
@@ -54,6 +55,13 @@ func Register(h *server.Hertz) {
 			experiences.POST("/", handler.NewExperienceHandler().CreateExperience)
 			experiences.PUT("/:id", handler.NewExperienceHandler().UpdateExperience)
 			experiences.DELETE("/:id", handler.NewExperienceHandler().DeleteExperience)
+		}
+
+		socialLinks := api.Group("/social-links")
+		{
+			socialLinks.POST("/", handler.NewSocialLinkHandler().CreateSocialLink)
+			socialLinks.PUT("/:id", handler.NewSocialLinkHandler().UpdateSocialLink)
+			socialLinks.DELETE("/:id", handler.NewSocialLinkHandler().DeleteSocialLink)
 		}
 	}
 

@@ -1,5 +1,5 @@
 import { client } from '@/modules/shared/api/client';
-import type { Project, DiaryEntry, Skill, Experience } from '@/modules/shared/types';
+import type { Project, DiaryEntry, Skill, Experience, SocialLink } from '@/modules/shared/types';
 
 // Projects
 export const createProject = async (data: Partial<Project>): Promise<Project> => {
@@ -51,4 +51,17 @@ export const updateExperience = async (id: string | number, data: Partial<Experi
 
 export const deleteExperience = async (id: string | number): Promise<void> => {
   return client.delete(`/experiences/${id}`);
+};
+
+// Social Links
+export const createSocialLink = async (data: Partial<SocialLink>): Promise<SocialLink> => {
+  return client.post<SocialLink>('/social-links/', data);
+};
+
+export const updateSocialLink = async (id: string | number, data: Partial<SocialLink>): Promise<SocialLink> => {
+  return client.put<SocialLink>(`/social-links/${id}`, data);
+};
+
+export const deleteSocialLink = async (id: string | number): Promise<void> => {
+  return client.delete(`/social-links/${id}`);
 };

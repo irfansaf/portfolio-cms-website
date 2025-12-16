@@ -1,13 +1,17 @@
 import { useEffect, useRef } from 'react';
+import { useOutletContext } from 'react-router';
 import { motion } from 'framer-motion';
 import { Button } from '@/modules/shared/ui/button';
-import { ArrowDown, Github, Linkedin, Mail, Terminal } from 'lucide-react';
+import { ArrowDown, Terminal, Link as LinkIcon } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
+import type { AppContext } from '@/modules/shared/types';
 
 interface HeroSectionProps {
   onCtaClick: () => void;
 }
 
 export default function HeroSection({ onCtaClick }: HeroSectionProps) {
+  const { socialLinks } = useOutletContext<AppContext>();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -174,28 +178,22 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.6 }}
         >
-          <a
-            href="https://github.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-primary transition-colors"
-          >
-            <Github className="w-6 h-6" />
-          </a>
-          <a
-            href="https://linkedin.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-primary transition-colors"
-          >
-            <Linkedin className="w-6 h-6" />
-          </a>
-          <a
-            href="mailto:hello@example.com"
-            className="text-muted-foreground hover:text-primary transition-colors"
-          >
-            <Mail className="w-6 h-6" />
-          </a>
+          {socialLinks.filter(link => link.is_active).map((link) => {
+            // @ts-ignore - Dynamic icon lookup
+            const Icon = LucideIcons[link.icon] || LinkIcon;
+            return (
+              <a
+                key={link.ID}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-primary transition-colors"
+                title={link.platform}
+              >
+                <Icon className="w-6 h-6" />
+              </a>
+            );
+          })}
         </motion.div>
       </div>
     </section>

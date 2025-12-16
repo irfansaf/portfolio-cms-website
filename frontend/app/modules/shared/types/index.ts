@@ -37,6 +37,14 @@ export interface Experience {
   description: string;
 }
 
+export interface SocialLink {
+  ID: number;
+  platform: string;
+  url: string;
+  icon: string; // lucide-react icon name
+  is_active: boolean;
+}
+
 export interface NavItem {
   label: string;
   href: string;
@@ -49,6 +57,7 @@ export interface AppContext {
   diaryEntries: DiaryEntry[];
   skills: Skill[];
   experiences: Experience[];
+  socialLinks: SocialLink[];
   isAuthenticated: boolean;
   logout: () => void;
   fetchData: () => Promise<void>;
@@ -56,6 +65,7 @@ export interface AppContext {
   onUpdateDiaries: () => void;
   onUpdateSkills: () => void;
   onUpdateExperiences: () => void;
+  onUpdateSocialLinks: () => void;
   onLogout: () => void;
   onThemeToggle: () => void;
 }
