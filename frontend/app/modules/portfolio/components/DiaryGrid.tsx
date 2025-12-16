@@ -10,15 +10,7 @@ interface DiaryGridProps {
 export default function DiaryGrid({ entries }: DiaryGridProps) {
   const navigate = useNavigate();
 
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-      },
-    },
-  };
+
 
   const item = {
     hidden: { opacity: 0, y: 30 },
@@ -26,15 +18,20 @@ export default function DiaryGrid({ entries }: DiaryGridProps) {
   };
 
   return (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: '-100px' }}
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-    >
-      {entries.map((entry) => (
-        <motion.div key={entry.id} variants={item}>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {entries.length === 0 && (
+        <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12 text-muted-foreground">
+          No diary entries found.
+        </div>
+      )}
+      {entries.map((entry, index) => (
+        <motion.div
+          key={entry.id}
+          variants={item}
+          initial="hidden"
+          animate="show"
+          transition={{ duration: 0.5, delay: index * 0.1 }}
+        >
           <Card
             className="cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-2 h-full group border-l-4 border-l-primary"
             onClick={() => navigate(`/diary/${entry.slug}`)}
@@ -70,6 +67,6 @@ export default function DiaryGrid({ entries }: DiaryGridProps) {
           </Card>
         </motion.div>
       ))}
-    </motion.div>
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { Button } from '@/modules/shared/ui/button';
 import { Switch } from '@/modules/shared/ui/switch';
 import { Label } from '@/modules/shared/ui/label';
@@ -12,29 +12,41 @@ import {
 import { Menu, X, Moon, Sun } from 'lucide-react';
 
 interface NavBarProps {
-  currentPage: string;
   theme: 'light' | 'dark';
   onThemeToggle: () => void;
 }
 
-export default function NavBar({ theme, onThemeToggle }: Omit<NavBarProps, 'currentPage'>) {
+export default function NavBar({ theme, onThemeToggle }: NavBarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   const menuItems: { label: string; href: string }[] = [
-    { label: 'About', href: '#about' },
-    { label: 'Portfolio', href: '#portfolio' },
-    { label: 'Diaries', href: '#diaries' },
-    { label: 'Resume', href: '#resume' },
-    { label: 'Contact', href: '#contact' },
+    { label: 'About', href: '/#about' },
+    { label: 'Portfolio', href: '/portfolio' },
+    { label: 'Diaries', href: '/diaries' },
+    { label: 'Resume', href: '/#resume' },
+    { label: 'Contact', href: '/#contact' },
   ];
 
-  const handleNavClick = (href: string) => {
+  const handleNavClick = (href: string, e?: React.MouseEvent) => {
     setMobileMenuOpen(false);
-    if (href.startsWith('#')) {
-      const element = document.querySelector(href);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
+    
+    // Check if it's a hash link (either starts with # or /#)
+    const isHashLink = href.startsWith('#') || href.startsWith('/#');
+    
+    if (isHashLink) {
+      // Clean up the href to get just the selector
+      const selector = href.startsWith('/') ? href.substring(1) : href;
+      
+      // If we are already on the home page, smooth scroll
+      if (location.pathname === '/') {
+        if (e) e.preventDefault();
+        const element = document.querySelector(selector);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
       }
+      // If we are not on home page, let the default navigation happen (to /#section)
     }
   };
 
@@ -55,12 +67,7 @@ export default function NavBar({ theme, onThemeToggle }: Omit<NavBarProps, 'curr
                 <NavigationMenuItem key={item.label}>
                   <NavigationMenuLink
                     href={item.label === 'About' ? '/' : item.href}
-                    onClick={(e) => {
-                      if (item.href.startsWith('#')) {
-                        e.preventDefault();
-                        handleNavClick(item.href);
-                      }
-                    }}
+                    onClick={(e) => handleNavClick(item.href, e)}
                     className="px-4 py-2 text-foreground hover:text-primary transition-colors cursor-pointer font-normal"
                   >
                     {item.label}
@@ -120,14 +127,7 @@ export default function NavBar({ theme, onThemeToggle }: Omit<NavBarProps, 'curr
                 <NavigationMenuItem key={item.label} className="w-full">
                   <NavigationMenuLink
                     href={item.label === 'About' ? '/' : item.href}
-                    onClick={(e) => {
-                      if (item.href.startsWith('#')) {
-                        e.preventDefault();
-                        handleNavClick(item.href);
-                      } else {
-                        setMobileMenuOpen(false);
-                      }
-                    }}
+                    onClick={(e) => handleNavClick(item.href, e)}
                     className="block px-4 py-3 text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer font-normal"
                   >
                     {item.label}

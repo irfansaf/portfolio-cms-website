@@ -10,15 +10,7 @@ interface PortfolioGridProps {
 export default function PortfolioGrid({ projects }: PortfolioGridProps) {
   const navigate = useNavigate();
 
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-      },
-    },
-  };
+
 
   const item = {
     hidden: { opacity: 0, y: 30 },
@@ -26,15 +18,20 @@ export default function PortfolioGrid({ projects }: PortfolioGridProps) {
   };
 
   return (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: '-100px' }}
-      className="grid grid-cols-1 md:grid-cols-2 gap-8"
-    >
-      {projects.map((project) => (
-        <motion.div key={project.id} variants={item}>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {projects.length === 0 && (
+        <div className="col-span-1 md:col-span-2 text-center py-12 text-muted-foreground">
+          No projects found.
+        </div>
+      )}
+      {projects.map((project, index) => (
+        <motion.div
+          key={project.id}
+          variants={item}
+          initial="hidden"
+          animate="show"
+          transition={{ duration: 0.5, delay: index * 0.1 }}
+        >
           <Card
             className="cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2 h-full group"
             onClick={() => navigate(`/project/${project.slug}`)}
@@ -75,6 +72,6 @@ export default function PortfolioGrid({ projects }: PortfolioGridProps) {
           </Card>
         </motion.div>
       ))}
-    </motion.div>
+    </div>
   );
 }
