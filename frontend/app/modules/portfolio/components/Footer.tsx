@@ -64,9 +64,19 @@ export default function Footer() {
             </p>
             <a
               href="#contact"
-              className="text-primary hover:underline block mb-6"
+              className="text-primary hover:underline block mb-4"
             >
               Contact Me →
+            </a>
+            <a
+              href="/feed.xml"
+              className="text-muted-foreground hover:text-primary transition-colors text-sm flex items-center gap-2 mb-6"
+              title="RSS Feed"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3.429 2.571c0 1.893 1.536 3.429 3.429 3.429v1.714C3.536 7.714 1 5.178 1 2.571h2.429zM7.286 2.571c0 1.893 1.536 3.429 3.429 3.429v1.714c-3.322 0-6-2.678-6-6h2.571zM11.143 2.571c0 1.893 1.536 3.429 3.429 3.429v1.714c-3.322 0-6-2.678-6-6h2.571zM3.429 6.857c0 1.893 1.536 3.429 3.429 3.429v1.714C3.536 12 1 9.464 1 6.857h2.429zM7.286 6.857c0 1.893 1.536 3.429 3.429 3.429v1.714c-3.322 0-6-2.678-6-6h2.571zM11.143 6.857c0 1.893 1.536 3.429 3.429 3.429v1.714c-3.322 0-6-2.678-6-6h2.571z"/>
+              </svg>
+              RSS Feed
             </a>
 
             <div className="flex gap-4">
@@ -92,8 +102,19 @@ export default function Footer() {
 
         <Separator className="mb-8" />
 
-        <div className="text-center text-muted-foreground">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-muted-foreground">
           <p>© {currentYear} {siteName}. All rights reserved.</p>
+          <div className="flex gap-6 text-sm">
+            <Link to="/sitemap" className="hover:text-primary transition-colors">
+              Sitemap
+            </Link>
+            <a href="/feed.xml" className="hover:text-primary transition-colors">
+              RSS Feed
+            </a>
+            <a href="/sitemap.xml" className="hover:text-primary transition-colors">
+              XML Sitemap
+            </a>
+          </div>
         </div>
       </div>
     </footer>

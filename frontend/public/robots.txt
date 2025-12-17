@@ -1,0 +1,15 @@
+# robots.txt for Portfolio CMS Website
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow CMS and admin routes
+Disallow: /cms
+Disallow: /login
+Disallow: /register
+Disallow: /setup
+
+# Sitemap location (update with your actual domain)
+Sitemap: https://example.com/sitemap.xml
+

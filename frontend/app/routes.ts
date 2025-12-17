@@ -5,6 +5,7 @@ export default [
     index("modules/portfolio/pages/HomePage.tsx"),
     route("portfolio", "modules/portfolio/pages/PortfolioPage.tsx"),
     route("diaries", "modules/portfolio/pages/DiariesPage.tsx"),
+    route("sitemap", "modules/portfolio/pages/SitemapPage.tsx"),
     route("project/:slug", "modules/portfolio/pages/ProjectDetailPage.tsx"),
     route("diary/:slug", "modules/portfolio/pages/DiaryDetailPage.tsx"),
     

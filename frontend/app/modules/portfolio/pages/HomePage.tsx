@@ -10,8 +10,44 @@ import ResumeSection from '../components/ResumeSection';
 import ContactForm from '../components/ContactForm';
 import Footer from '../components/Footer';
 import type { AppContext } from '@/modules/shared/types';
+import { generateOpenGraphTags, generateTwitterCardTags, generateCanonicalUrl, generateWebsiteStructuredData, generatePersonStructuredData } from '@/modules/shared/lib/seo';
+import StructuredData from '@/modules/shared/components/StructuredData';
 
 gsap.registerPlugin(ScrollTrigger);
+
+export const meta = () => {
+  const description = 'A modern portfolio website showcasing projects, technical articles, and professional experience. Built with React and Go.';
+  const title = 'Software Engineer Portfolio';
+  const url = '/';
+  
+  const ogTags = generateOpenGraphTags({
+    title,
+    description,
+    url,
+    siteName: 'Portfolio',
+  });
+
+  const twitterTags = generateTwitterCardTags({
+    title,
+    description,
+  });
+
+  return [
+    { title },
+    { name: 'description', content: description },
+    { name: 'keywords', content: 'portfolio, software engineer, developer, full stack, web development, projects' },
+    { tagName: 'link', rel: 'canonical', href: generateCanonicalUrl(url) },
+    ...ogTags.map(tag => ({
+      ...(tag.property ? { property: tag.property } : {}),
+      ...(tag.name ? { name: tag.name } : {}),
+      content: tag.content,
+    })),
+    ...twitterTags.map(tag => ({
+      name: tag.name,
+      content: tag.content,
+    })),
+  ];
+};
 
 export default function HomePage() {
   const { theme, onThemeToggle, projects, diaryEntries, skills, experiences, siteName } = useOutletContext<AppContext>();
@@ -27,15 +63,38 @@ export default function HomePage() {
     portfolioRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Generate structured data
+  const structuredData = [];
+  
+  // Website structured data
+  structuredData.push(generateWebsiteStructuredData({
+    name: siteName,
+    url: generateCanonicalUrl('/'),
+    description: 'A modern portfolio website showcasing projects, technical articles, and professional experience.',
+  }));
+
+  // Person structured data (if we have social links)
+  const activeSocialLinks = socialLinks.filter(link => link.is_active);
+  if (activeSocialLinks.length > 0) {
+    structuredData.push(generatePersonStructuredData({
+      name: siteName,
+      url: generateCanonicalUrl('/'),
+      jobTitle: 'Software Engineer',
+      description: 'Full stack developer building scalable systems and solving complex problems.',
+      sameAs: activeSocialLinks.map(link => link.url),
+    }));
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <StructuredData data={structuredData} />
       <NavBar 
         siteName={siteName}
         theme={theme}
         onThemeToggle={onThemeToggle}
       />
       
-      <main>
+      <main id="main-content">
         <HeroSection onCtaClick={handleViewWork} />
         
         <section id="portfolio" ref={portfolioRef} className="py-24 px-8 bg-background">

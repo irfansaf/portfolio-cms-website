@@ -1,0 +1,246 @@
+/* Print Stylesheet
+   Optimizes the website for printing */
+
+@media print {
+  /* Reset and base styles */
+  * {
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Hide non-essential elements */
+  nav,
+  header,
+  footer,
+  .no-print,
+  button,
+  .btn,
+  [role="button"],
+  .navigation,
+  .sidebar,
+  .social-links,
+  .theme-toggle,
+  .back-button,
+  .contact-form,
+  .gallery,
+  .interactive-element {
+    display: none !important;
+  }
+
+  /* Page setup */
+  @page {
+    margin: 2cm;
+    size: A4;
+  }
+
+  /* Typography */
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000;
+    background: #fff;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+    color: #000;
+    font-weight: bold;
+  }
+
+  h1 {
+    font-size: 24pt;
+    margin-top: 0;
+    margin-bottom: 12pt;
+  }
+
+  h2 {
+    font-size: 18pt;
+    margin-top: 16pt;
+    margin-bottom: 10pt;
+  }
+
+  h3 {
+    font-size: 14pt;
+    margin-top: 12pt;
+    margin-bottom: 8pt;
+  }
+
+  /* Links */
+  a {
+    color: #000;
+    text-decoration: underline;
+  }
+
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 10pt;
+    color: #666;
+  }
+
+  a[href^="#"]:after,
+  a[href^="/"]:after {
+    content: "";
+  }
+
+  /* Images */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid;
+    page-break-after: avoid;
+  }
+
+  /* Lists */
+  ul, ol {
+    margin: 10pt 0;
+    padding-left: 20pt;
+  }
+
+  li {
+    margin: 4pt 0;
+  }
+
+  /* Code blocks */
+  pre,
+  code {
+    background: #f5f5f5 !important;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+    font-size: 10pt;
+  }
+
+  pre {
+    padding: 8pt;
+    overflow: visible;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  /* Tables */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    page-break-inside: avoid;
+  }
+
+  th, td {
+    border: 1px solid #000;
+    padding: 6pt;
+  }
+
+  th {
+    background: #f0f0f0 !important;
+    font-weight: bold;
+  }
+
+  /* Page breaks */
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  .page-break-after {
+    page-break-after: always;
+  }
+
+  .page-break-inside-avoid {
+    page-break-inside: avoid;
+  }
+
+  /* Main content */
+  main {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Cards and containers */
+  .card,
+  article,
+  section {
+    border: 1px solid #ddd;
+    padding: 12pt;
+    margin: 12pt 0;
+    page-break-inside: avoid;
+  }
+
+  /* Project/Diary specific */
+  .project-title,
+  .diary-title {
+    font-size: 20pt;
+    font-weight: bold;
+    margin-bottom: 8pt;
+  }
+
+  .project-meta,
+  .diary-meta {
+    font-size: 10pt;
+    color: #666;
+    margin-bottom: 12pt;
+  }
+
+  /* Technologies/Tags */
+  .tech-tag,
+  .badge {
+    display: inline-block;
+    border: 1px solid #000;
+    padding: 2pt 6pt;
+    margin: 2pt;
+    font-size: 9pt;
+  }
+
+  /* Prose content */
+  .prose {
+    max-width: 100%;
+  }
+
+  .prose p {
+    margin: 8pt 0;
+  }
+
+  .prose blockquote {
+    border-left: 3px solid #000;
+    padding-left: 12pt;
+    margin: 12pt 0;
+    font-style: italic;
+  }
+
+  /* Footer info */
+  .print-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 9pt;
+    color: #666;
+    border-top: 1px solid #ddd;
+    padding: 6pt;
+  }
+
+  /* URL and date info */
+  .print-url {
+    font-size: 9pt;
+    color: #666;
+    margin-top: 12pt;
+    text-align: center;
+  }
+
+  /* Avoid breaking */
+  p, li {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Ensure content doesn't break awkwardly */
+  section {
+    page-break-before: auto;
+  }
+
+  section:first-child {
+    page-break-before: avoid;
+  }
+}
+

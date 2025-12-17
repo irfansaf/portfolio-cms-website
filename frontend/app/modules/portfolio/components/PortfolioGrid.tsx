@@ -40,6 +40,8 @@ export default function PortfolioGrid({ projects }: PortfolioGridProps) {
               <img
                 src={project.img_src}
                 alt={project.title}
+                width={800}
+                height={450}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 loading="lazy"
               />

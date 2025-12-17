@@ -7,9 +7,44 @@ import type { AppContext } from '@/modules/shared/types';
 import { Button } from '@/modules/shared/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router';
+import { generateOpenGraphTags, generateTwitterCardTags, generateCanonicalUrl } from '@/modules/shared/lib/seo';
+
+export const meta = () => {
+  const title = 'Engineering Diaries - Blog';
+  const description = 'Technical articles, thoughts, and lessons learned along the journey. Read about software engineering, development practices, and more.';
+  const url = '/diaries';
+  
+  const ogTags = generateOpenGraphTags({
+    title,
+    description,
+    url,
+    type: 'blog',
+    siteName: 'Portfolio',
+  });
+
+  const twitterTags = generateTwitterCardTags({
+    title,
+    description,
+  });
+
+  return [
+    { title },
+    { name: 'description', content: description },
+    { tagName: 'link', rel: 'canonical', href: generateCanonicalUrl(url) },
+    ...ogTags.map(tag => ({
+      ...(tag.property ? { property: tag.property } : {}),
+      ...(tag.name ? { name: tag.name } : {}),
+      content: tag.content,
+    })),
+    ...twitterTags.map(tag => ({
+      name: tag.name,
+      content: tag.content,
+    })),
+  ];
+};
 
 export default function DiariesPage() {
-  const { theme, onThemeToggle, diaryEntries } = useOutletContext<AppContext>();
+  const { theme, onThemeToggle, diaryEntries, siteName } = useOutletContext<AppContext>();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -17,9 +52,9 @@ export default function DiariesPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <NavBar theme={theme} onThemeToggle={onThemeToggle} />
+      <NavBar siteName={siteName} theme={theme} onThemeToggle={onThemeToggle} />
       
-      <main className="py-32 px-8">
+      <main id="main-content" className="py-32 px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-16">
             <div>
@@ -30,8 +65,11 @@ export default function DiariesPage() {
                 Technical articles, thoughts, and lessons learned along the journey.
               </p>
             </div>
-            <Button asChild variant="outline">
-              <Link to="/">
+            <Button asChild>
+              <Link 
+                to="/"
+                className="border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
+              >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Home
               </Link>
